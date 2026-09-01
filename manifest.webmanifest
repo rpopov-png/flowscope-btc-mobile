@@ -1,0 +1,9 @@
+{
+  "name": "FlowScope BTC",
+  "short_name": "FlowScope",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07111e",
+  "theme_color": "#07111e",
+  "icons": []
+}
