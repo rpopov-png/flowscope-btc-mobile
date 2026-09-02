@@ -2,21 +2,22 @@ import csv, io, json, statistics, time
 from pathlib import Path
 import requests
 
-ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / 'data'
-DATA.mkdir(exist_ok=True)
+ROOT=Path(__file__).resolve().parents[1]
+DATA=ROOT/'data'; DATA.mkdir(exist_ok=True)
 HEADERS={'User-Agent':'Mozilla/5.0 FlowScope/1.0'}
 
-def mean(xs): return sum(xs)/len(xs) if xs else 0.0
-def stdev(xs):
-    if len(xs)<2:return 1.0
-    s=statistics.pstdev(xs); return s if s>1e-12 else 1.0
-def z_last(xs):
-    if len(xs)<10:return 0.0
-    h=xs[:-1]; return (xs[-1]-mean(h))/stdev(h)
-def get_json(url):
-    r=requests.get(url,timeout=25,headers=HEADERS); r.raise_for_status(); return r.json()
-def get_text(url):
+def mean(x): return sum(x)/len(x) if x else 0.0
+def sd(x):
+    if len(x)<2:return 1.0
+    s=statistics.pstdev(x); return s if s>1e-12 else 1.0
+def zlast(x):
+    if len(x)<10:return 0.0
+    h=x[:-1]; return (x[-1]-mean(h))/sd(h)
+def getj(url):
+    r=requests.get(url,timeout=25,headers=HEADERS); r.raise_for_status(); j=r.json()
+    if isinstance(j,dict) and j.get('code') not in (None,'0',0): raise RuntimeError(j.get('msg') or str(j.get('code')))
+    return j
+def gett(url):
     r=requests.get(url,timeout=25,headers=HEADERS); r.raise_for_status(); return r.text
 
 def flow_class(z):
@@ -45,7 +46,7 @@ def etf_class(d,d3,m):
     if d<0 or d3<0:return 'Outflow','neg'
     return 'Neutral','neu'
 
-def regime_engine(pm,sz,fz,oz,uz):
+def regime(pm,sz,fz,oz,uz):
     r={'regime':'Mixed Market','confidence':'LOW','title':'Смешанный рынок','text':'Потоки пока не формируют чистую закономерность.','confirm':'Ждём согласования Spot / Futures / OI / Funding.','cancel':'—'}
     if pm>0 and sz>.45 and fz>-.45 and oz<1.5 and uz<1.5:r={'regime':'Healthy Spot Growth','confidence':'MEDIUM','title':'Здоровый спотовый рост','text':'Рост подтверждается спотовым спросом, а плечи пока не выглядят экстремально перегретыми.','confirm':'Spot остаётся сильным, OI не ускоряется экстремально.','cancel':'Spot слабеет, а Futures / OI начинают доминировать.'}
     if pm>0 and sz<.45 and fz>1.0 and oz>1.0 and uz>.6:r={'regime':'Futures-driven Rise','confidence':'HIGH','title':'Перегретый рост на фьючерсах','text':'Цена растёт преимущественно за счёт деривативов. Spot не подтверждает движение, OI и Funding повышают уязвимость структуры.','confirm':'Spot остаётся слабым, а импульс Futures начинает затухать.','cancel':'Появляется устойчивый сильный Spot-покупатель.'}
@@ -56,22 +57,16 @@ def regime_engine(pm,sz,fz,oz,uz):
     if pm>=0 and sz>.6 and oz<-.5 and uz<.3:r={'regime':'Healthy Deleveraging','confidence':'HIGH','title':'Здоровое снижение плеч','text':'Цена держится при сильном Spot, а OI / Funding охлаждаются. Плечи очищаются без потери спроса.','confirm':'Spot сохраняет спрос после снижения OI.','cancel':'Spot также начинает слабеть.'}
     return r
 
-def fetch_etf():
+def etf():
     try:
-        text=get_text('https://raw.githubusercontent.com/bykarantelicom/crypto-datasets/main/data/etf-flows.csv')
         rows=[]
-        for r in csv.DictReader(io.StringIO(text)):
-            if r.get('asset')=='BTC':
-                rows.append((r['date'],float(r['net_inflow_usd'])/1_000_000.0))
-        if not rows: raise RuntimeError('empty ETF dataset')
-        vals=[v for _,v in rows]
-        daily=vals[0]; d3=sum(vals[:3]); last5=mean(vals[:5]); prev5=mean(vals[5:10]) if len(vals)>=10 else 0.0; mom=last5-prev5
-        status,cls=etf_class(daily,d3,mom)
-        return {'status':status,'cls':cls,'daily':daily,'d3':d3,'momentum5':mom,'date':rows[0][0],'source':'bykaranteli/SoSoValue'}
-    except Exception as e:
-        return {'status':'Unavailable','cls':'off','daily':None,'d3':None,'momentum5':None,'date':None,'error':str(e)[:160]}
+        for r in csv.DictReader(io.StringIO(gett('https://raw.githubusercontent.com/bykarantelicom/crypto-datasets/main/data/etf-flows.csv'))):
+            if r.get('asset')=='BTC': rows.append((r['date'],float(r['net_inflow_usd'])/1_000_000))
+        vals=[v for _,v in rows]; d=vals[0]; d3=sum(vals[:3]); m=mean(vals[:5])-mean(vals[5:10]); st,cl=etf_class(d,d3,m)
+        return {'status':st,'cls':cl,'daily':d,'d3':d3,'momentum5':m,'date':rows[0][0],'source':'SoSoValue dataset'}
+    except Exception as e:return {'status':'Unavailable','cls':'off','daily':None,'d3':None,'momentum5':None,'date':None,'error':str(e)[:160]}
 
-def aggregate(xs,n):
+def agg(xs,n):
     if n<=1:return xs
     out=[]
     for i in range(0,len(xs),n):
@@ -79,80 +74,73 @@ def aggregate(xs,n):
         if len(g)==n: out.append(sum(g))
     return out
 
-def okx_taker_series(inst_type,tf):
+def taker(inst_type,tf):
     period='1H'; group=1
-    if tf=='4h': group=4
-    elif tf=='1d': period='1D'
-    elif tf=='1w': period='1D'; group=7
-    url=f'https://www.okx.com/api/v5/rubik/stat/taker-volume?ccy=BTC&instType={inst_type}&period={period}'
-    j=get_json(url)
-    rows=j.get('data') or []
-    # OKX returns newest first: [ts, sellVol, buyVol]
+    if tf=='4h':group=4
+    elif tf=='1d':period='1D'
+    elif tf=='1w':period='1D'; group=7
+    j=getj(f'https://www.okx.com/api/v5/rubik/stat/taker-volume?ccy=BTC&instType={inst_type}&period={period}')
     vals=[]
-    for r in reversed(rows):
+    for r in reversed(j.get('data') or []):
         try: vals.append(float(r[2])-float(r[1]))
         except: pass
-    vals=aggregate(vals,group)
-    if len(vals)<10: raise RuntimeError(f'not enough OKX {inst_type} taker data')
+    vals=agg(vals,group)
+    if len(vals)<10: raise RuntimeError('insufficient taker history')
     return vals
 
-def bybit_price(tf):
-    iv={'1h':'60','4h':'240','1d':'D','1w':'W'}[tf]
-    j=get_json(f'https://api.bybit.com/v5/market/kline?category=spot&symbol=BTCUSDT&interval={iv}&limit=120')
-    rows=j['result']['list']
-    if len(rows)<2: raise RuntimeError('Bybit price unavailable')
+def price(tf):
+    bar={'1h':'1H','4h':'4H','1d':'1D','1w':'1W'}[tf]
+    j=getj(f'https://www.okx.com/api/v5/market/candles?instId=BTC-USDT&bar={bar}&limit=100')
+    rows=j.get('data') or []
+    if len(rows)<2: raise RuntimeError('OKX price unavailable')
     p1=float(rows[0][4]); p0=float(rows[1][4]); return p1,(p1/p0-1)*100
 
-def bybit_oi(tf):
-    iv={'1h':'1h','4h':'4h','1d':'1d','1w':'1d'}[tf]
-    j=get_json(f'https://api.bybit.com/v5/market/open-interest?category=linear&symbol=BTCUSDT&intervalTime={iv}&limit=200')
-    arr=list(reversed([float(x['openInterest']) for x in j['result']['list']]))
-    if tf=='1w': arr=arr[::7]
-    changes=[(arr[i]/arr[i-1]-1)*100 for i in range(1,len(arr)) if arr[i-1]]
-    if len(changes)<3: raise RuntimeError('Bybit OI unavailable')
-    oz=z_last(changes); och=changes[-1]; ost,ocl=oi_class(oz)
-    return {'status':ost,'cls':ocl,'z':oz,'change':och}
+def oi(tf):
+    period='1H'; group=1
+    if tf=='4h':group=4
+    elif tf=='1d':period='1D'
+    elif tf=='1w':period='1D'; group=7
+    j=getj(f'https://www.okx.com/api/v5/rubik/stat/contracts/open-interest-volume?ccy=BTC&period={period}')
+    arr=[float(r[1]) for r in reversed(j.get('data') or []) if len(r)>1]
+    if group>1: arr=arr[::group]
+    ch=[(arr[i]/arr[i-1]-1)*100 for i in range(1,len(arr)) if arr[i-1]]
+    if len(ch)<3: raise RuntimeError('OKX OI unavailable')
+    z=zlast(ch); st,cl=oi_class(z); return {'status':st,'cls':cl,'z':z,'change':ch[-1],'source':'OKX'}
 
-def bybit_funding():
-    j=get_json('https://api.bybit.com/v5/market/funding/history?category=linear&symbol=BTCUSDT&limit=200')
-    arr=list(reversed([float(x['fundingRate']) for x in j['result']['list']]))
-    if len(arr)<3: raise RuntimeError('Bybit funding unavailable')
-    uz=z_last(arr); rate=arr[-1]; ust,ucl=funding_class(uz)
-    return {'status':ust,'cls':ucl,'z':uz,'rate':rate}
+def funding():
+    j=getj('https://www.okx.com/api/v5/public/funding-rate-history?instId=BTC-USDT-SWAP&limit=100')
+    vals=[]
+    for r in reversed(j.get('data') or []):
+        try: vals.append(float(r.get('realizedRate') or r.get('fundingRate')))
+        except: pass
+    if len(vals)<3: raise RuntimeError('OKX funding unavailable')
+    z=zlast(vals); st,cl=funding_class(z); return {'status':st,'cls':cl,'z':z,'rate':vals[-1],'source':'OKX'}
 
-def fetch_state(tf,etf):
+def state(tf,e):
     errors=[]
-    price,pm=bybit_price(tf)
+    p,pm=price(tf)
     try:
-        sdel=okx_taker_series('SPOT',tf); sz=z_last(sdel); sst,scl=flow_class(sz)
-        spot={'status':sst,'cls':scl,'z':sz,'delta':sdel[-1],'source':'OKX taker volume'}
-    except Exception as e:
-        errors.append('Spot: '+str(e)[:120]); spot={'status':'Unavailable','cls':'off','z':0.0,'delta':None}
+        x=taker('SPOT',tf); z=zlast(x); st,cl=flow_class(z); spot={'status':st,'cls':cl,'z':z,'delta':x[-1],'source':'OKX'}
+    except Exception as ex: errors.append('Spot: '+str(ex)[:100]); spot={'status':'Unavailable','cls':'off','z':0.0,'delta':None}
     try:
-        fdel=okx_taker_series('CONTRACTS',tf); fz=z_last(fdel); fst,fcl=flow_class(fz)
-        futures={'status':fst,'cls':fcl,'z':fz,'delta':fdel[-1],'source':'OKX taker volume'}
-    except Exception as e:
-        errors.append('Futures: '+str(e)[:120]); futures={'status':'Unavailable','cls':'off','z':0.0,'delta':None}
-    try: oi=bybit_oi(tf)
-    except Exception as e:
-        errors.append('OI: '+str(e)[:120]); oi={'status':'Unavailable','cls':'off','z':0.0,'change':None}
-    try: funding=bybit_funding()
-    except Exception as e:
-        errors.append('Funding: '+str(e)[:120]); funding={'status':'Unavailable','cls':'off','z':0.0,'rate':None}
-    reg=regime_engine(pm,spot['z'],futures['z'],oi['z'],funding['z'])
-    return {'ok':True,'ts':int(time.time()),'tf':tf,'price':price,'priceMove':pm,'spot':spot,'futures':futures,'oi':oi,'funding':funding,'etf':etf,'regime':reg,'errors':errors}
+        x=taker('CONTRACTS',tf); z=zlast(x); st,cl=flow_class(z); fut={'status':st,'cls':cl,'z':z,'delta':x[-1],'source':'OKX'}
+    except Exception as ex: errors.append('Futures: '+str(ex)[:100]); fut={'status':'Unavailable','cls':'off','z':0.0,'delta':None}
+    try:o=oi(tf)
+    except Exception as ex:errors.append('OI: '+str(ex)[:100]); o={'status':'Unavailable','cls':'off','z':0.0,'change':None}
+    try:f=funding()
+    except Exception as ex:errors.append('Funding: '+str(ex)[:100]); f={'status':'Unavailable','cls':'off','z':0.0,'rate':None}
+    return {'ok':True,'ts':int(time.time()),'tf':tf,'price':p,'priceMove':pm,'spot':spot,'futures':fut,'oi':o,'funding':f,'etf':e,'regime':regime(pm,spot['z'],fut['z'],o['z'],f['z']),'errors':errors}
 
 def main():
-    etf=fetch_etf(); states={}
+    e=etf(); states={}
     for tf in ('1h','4h','1d','1w'):
-        try: states[tf]=fetch_state(tf,etf)
-        except Exception as e: states[tf]={'ok':False,'tf':tf,'errors':[str(e)[:220]],'etf':etf}
-    payload={'generated_at':int(time.time()),'states':states}
-    (DATA/'state.json').write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+        try:states[tf]=state(tf,e)
+        except Exception as ex:states[tf]={'ok':False,'tf':tf,'errors':[str(ex)[:220]],'etf':e}
+    (DATA/'state.json').write_text(json.dumps({'generated_at':int(time.time()),'states':states},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
     hp=DATA/'history.json'
-    try: hist=json.loads(hp.read_text(encoding='utf-8'))
-    except: hist=[]
+    try:h=json.loads(hp.read_text(encoding='utf-8'))
+    except:h=[]
     if states.get('4h',{}).get('ok'):
-        d=states['4h']; hist.append({'ts':d['ts'],'price':d['price'],'spot_z':d['spot']['z'],'futures_z':d['futures']['z'],'oi_z':d['oi']['z'],'funding_z':d['funding']['z'],'etf_daily':d['etf'].get('daily'),'regime':d['regime']['regime']})
-    hp.write_text(json.dumps(hist[-500:],ensure_ascii=False,separators=(',',':')),encoding='utf-8')
-if __name__=='__main__': main()
+        d=states['4h']; h.append({'ts':d['ts'],'price':d['price'],'spot_z':d['spot']['z'],'futures_z':d['futures']['z'],'oi_z':d['oi']['z'],'funding_z':d['funding']['z'],'etf_daily':d['etf'].get('daily'),'regime':d['regime']['regime']})
+    hp.write_text(json.dumps(h[-500:],ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+if __name__=='__main__':main()
