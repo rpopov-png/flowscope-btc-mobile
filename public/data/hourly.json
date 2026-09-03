@@ -1,148 +1,38 @@
 {
-  "updated_at": "2026-09-03T10:10:00Z",
-  "price_current": 77288.6,
-  "price_1h_pct": null,
-  "price_24h_pct": 0.04,
+  "updated_at": "2026-09-03T10:56:00Z",
+  "price_current": 77597.27,
+  "price_1h_pct": -0.05,
+  "price_24h_pct": 0.18,
   "spot_cvd": null,
   "futures_cvd": null,
-  "oi_usd": 53320000000,
-  "oi_change_pct": null,
-  "funding": null,
-  "basis": null,
-  "liquidations": {
-    "long_1h": null,
-    "short_1h": null,
-    "long_4h": null,
-    "short_4h": null,
-    "long_12h": null,
-    "short_12h": null,
-    "long_24h": null,
-    "short_24h": null,
-    "total_24h": 52138959
-  },
+  "oi_usd": 25100000000,
+  "oi_change_pct": 0.11,
+  "funding": 0.0076,
+  "basis": "Binance BTCUSDT_260925 +0.34%",
+  "liquidations": {"long_1h":null,"short_1h":null,"long_4h":null,"short_4h":null,"long_12h":null,"short_12h":null,"long_24h":null,"short_24h":null,"total_24h":28200000},
   "liquidity_map": null,
-  "etf": {
-    "daily": 101.1,
-    "d3": 81.3,
-    "status": "Inflow",
-    "date": "2026-09-02",
-    "finality": "final"
-  },
-  "current_regime": "Нейтральный рынок / ожидание подтверждения",
-  "regime_text": "BTC держится около $77.3k и почти не изменился за 24ч. Последний финальный ETF-срез развернулся в приток +$101.1M после сильного оттока днём ранее, но надёжные свежие Spot/Futures CVD, OI-change, funding, basis и разбивка ликвидаций LONG/SHORT в этом срезе не подтверждены. Поэтому направленный режим не фиксируем.",
+  "etf": {"daily":101.1,"d3":81.3,"status":"Inflow","date":"2026-09-02","finality":"final"},
+  "current_regime": "Отказ от $78k / баланс",
+  "regime_text": "BTC около $77.60k после очередной неудачной попытки принять $78k. OI около $25.1B и +0.11% за 24ч, funding +0.0076%, basis Sep25 +0.34%. ETF 02.09 final +$101.1M поддерживает спрос, но Spot/Futures CVD не подтверждены. Без CVD и разбивки ликвидаций снижение нельзя жёстко классифицировать как разгрузку лонгов или набор новых шортов.",
   "causal_sequence": [
-    {
-      "label": "ETF: 1 сентября -$236.5M, 2 сентября +$101.1M final",
-      "direction": "↑",
-      "stage": "БЫЛО"
-    },
-    {
-      "label": "Цена BTC: около $77.3k, 24ч +0.04%",
-      "direction": "→",
-      "stage": "СЕЙЧАС"
-    },
-    {
-      "label": "Агрегированный OI: около $53.32B; надёжное изменение за окно не подтверждено",
-      "direction": "→",
-      "stage": "СЕЙЧАС"
-    },
-    {
-      "label": "Ликвидации BTC за 24ч: около $52.14M total; LONG/SHORT split не подтверждён",
-      "direction": "→",
-      "stage": "СЕЙЧАС"
-    }
+    {"label":"ETF 02.09 final +$101.1M","direction":"up","stage":"БЫЛО"},
+    {"label":"BTC несколько раз тестировал $77.8-78k без устойчивого принятия","direction":"flat","stage":"БЫЛО"},
+    {"label":"BTC вернулся к ~$77.60k","direction":"down","stage":"ПЕРЕХОД"},
+    {"label":"OI ~$25.1B, +0.11% 24ч; funding +0.0076%","direction":"flat","stage":"СЕЙЧАС"},
+    {"label":"Spot/Futures CVD н/д; разбивка ликвидаций по окнам н/д","direction":"flat","stage":"СЕЙЧАС"}
   ],
   "scenarios": [
-    {
-      "name": "1. Здоровый рост",
-      "status": "НЕ ПОДТВЕРЖДЁН",
-      "conditions": "ETF приток должен сопровождаться устойчивым Spot CVD ↑ и удержанием цены выше локального диапазона",
-      "tactic": "Не считать ETF-приток самостоятельным LONG-сигналом",
-      "confirmation": "Свежий Spot CVD ↑ + цена ↑ при умеренном OI"
-    },
-    {
-      "name": "2. Вынос шортов",
-      "status": "НЕ ПОДТВЕРЖДЁН",
-      "conditions": "Цена ↑ при OI ↓ и росте Short Liq",
-      "tactic": "Не маркировать squeeze без разбивки ликвидаций и OI-change",
-      "confirmation": "OI ↓ + Short Liq ↑"
-    },
-    {
-      "name": "3. Набор новых лонгов",
-      "status": "НЕ ПОДТВЕРЖДЁН",
-      "conditions": "Цена ↑ + OI ↑ + funding ↑ при слабом Spot",
-      "tactic": "Ждать свежие OI/funding/CVD",
-      "confirmation": "Одновременный рост OI и funding без Spot-подтверждения"
-    },
-    {
-      "name": "4. Разгрузка лонгов",
-      "status": "НЕ ПОДТВЕРЖДЁН",
-      "conditions": "Цена ↓ + OI ↓ + Long Liq ↑",
-      "tactic": "Не переносить вчерашний long-flush на текущий час без свежих данных",
-      "confirmation": "Свежая разбивка Long Liq + OI ↓"
-    },
-    {
-      "name": "5. Набор новых шортов",
-      "status": "НЕ ПОДТВЕРЖДЁН",
-      "conditions": "Цена ↓ + OI ↑ + Futures CVD ↓",
-      "tactic": "SHORT-bias только после подтверждения нового OI-build",
-      "confirmation": "OI ↑ + Futures CVD ↓"
-    },
-    {
-      "name": "6. Поглощение продавца",
-      "status": "ПЕРЕХОД",
-      "conditions": "Цена остаётся устойчивой после разворота ETF-потока в плюс, но свежий Spot CVD пока не подтверждён",
-      "tactic": "Следить, появится ли реальный спотовый покупатель",
-      "confirmation": "Spot CVD ↑ при сохранении цены выше локальных минимумов"
-    }
+    {"name":"Здоровый рост","status":"ОСЛАБ","conditions":"Возврат и принятие выше $78k при Spot CVD вверх и умеренном OI","tactic":"LONG только по технической модели после подтверждения","confirmation":"Удержание выше $78k + Spot CVD вверх"},
+    {"name":"Вынос шортов","status":"НЕ ПОДТВЕРЖДЁН","conditions":"Цена вверх + OI вниз + Short Liq вверх","tactic":"Ждать подтверждения","confirmation":"Надёжная часовая разбивка Short Liq при снижении OI"},
+    {"name":"Набор новых лонгов","status":"ПОД ВОПРОСОМ","conditions":"Цена не проходит $78k при OI вверх и положительном funding","tactic":"Не догонять LONG","confirmation":"OI ускоряется вверх без прогресса цены"},
+    {"name":"Разгрузка лонгов","status":"НЕ ПОДТВЕРЖДЁН","conditions":"Цена вниз + OI вниз + Long Liq вверх","tactic":"Ждать подтверждения","confirmation":"Потеря $77.3k + OI вниз + Long Liq вверх"},
+    {"name":"Набор новых шортов","status":"НЕ ПОДТВЕРЖДЁН","conditions":"Цена вниз + OI вверх + Futures CVD вниз","tactic":"SHORT только по технической модели","confirmation":"Цена вниз при устойчивом OI вверх и Futures CVD вниз"},
+    {"name":"Поглощение покупателя","status":"ПОД ВОПРОСОМ","conditions":"ETF положительный, но цена не принимает $78k","tactic":"Не считать рост подтверждённым","confirmation":"Положительный Spot/ETF спрос без прогресса цены"}
   ],
   "next_branch": {
-    "up": [
-      {
-        "condition": "Spot CVD ↑ + BTC выходит вверх из текущего диапазона",
-        "interpretation": "Здоровый спотовый рост"
-      },
-      {
-        "condition": "Цена ↑ + OI ↓ + Short Liq ↑",
-        "interpretation": "Short squeeze"
-      },
-      {
-        "condition": "Цена ↑ + OI ↑ + funding ↑ при слабом Spot",
-        "interpretation": "Набор новых лонгов / рост leverage"
-      }
-    ],
-    "down": [
-      {
-        "condition": "Цена ↓ + OI ↓ + Long Liq ↑",
-        "interpretation": "Разгрузка лонгов"
-      },
-      {
-        "condition": "Цена ↓ + OI ↑ + Futures CVD ↓",
-        "interpretation": "Набор новых шортов"
-      },
-      {
-        "condition": "Spot CVD ↑, а цена перестаёт обновлять low",
-        "interpretation": "Поглощение продавца"
-      }
-    ]
+    "up":[{"condition":"BTC выше $78k + Spot CVD вверх + OI умеренный","interpretation":"Здоровый рост"},{"condition":"Цена вверх + OI вниз + Short Liq вверх","interpretation":"Вынос шортов"}],
+    "down":[{"condition":"Потеря $77.3k + OI вниз + Long Liq вверх","interpretation":"Разгрузка лонгов"},{"condition":"Цена вниз + OI вверх + Futures CVD вниз","interpretation":"Набор новых шортов"}]
   },
-  "sources": [
-    "CoinGlass",
-    "Farside Investors",
-    "CoinGecko"
-  ],
-  "metric_status": {
-    "price_current": "verified: CoinGlass current BTC price",
-    "price_1h_pct": "unconfirmed in this run",
-    "price_24h_pct": "verified: CoinGlass current 24h change",
-    "spot_cvd": "no reliable fresh value confirmed in this run",
-    "futures_cvd": "no reliable fresh value confirmed in this run",
-    "oi_usd": "verified: CoinGlass aggregated BTC open interest",
-    "oi_change_pct": "not reliably exposed in current accessible snapshot",
-    "funding": "current aggregate value not reliably exposed in accessible snapshot",
-    "basis": "no reliable aggregate basis confirmed",
-    "liquidations": "CoinGlass verified BTC total 24h liquidation; LONG/SHORT breakdown unavailable in accessible snapshot",
-    "etf": "Farside final Sep 2 flow +$101.1M; 3-day sum = +$81.3M using Aug 31, Sep 1, Sep 2",
-    "liquidity_map": "no reliable current levels confirmed in this run"
-  }
+  "sources": ["CoinMarketCap","CoinCodex","Coinalyze","Farside Investors","CoinGlass"],
+  "metric_status": {"price_current":"verified","price_1h_pct":"verified","price_24h_pct":"verified_crosscheck","spot_cvd":"unavailable","futures_cvd":"unavailable","oi_usd":"verified","oi_change_pct":"verified_same_source_coverage","funding":"verified_same_source_coverage","basis":"verified_single_contract","liquidations":"partial_only_total_24h","liquidity_map":"unavailable","etf":"verified_final"}
 }
