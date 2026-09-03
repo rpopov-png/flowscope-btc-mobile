@@ -1,1 +1,179 @@
-{"updated_at":null,"price_1h_pct":null,"price_24h_pct":null,"spot_cvd":null,"futures_cvd":null,"oi_usd":null,"oi_change_pct":null,"funding":null,"basis":null,"liquidations":{"long_1h":null,"short_1h":null,"long_4h":null,"short_4h":null,"long_12h":null,"short_12h":null,"long_24h":null,"short_24h":null,"total_24h":null},"liquidity_map":null,"sources":[],"status":"waiting_for_hourly_sync"}
+{
+  "updated_at": "2026-09-02T19:52:26Z",
+  "price_current": 77238.63,
+  "price_1h_pct": 0.2,
+  "price_24h_pct": -0.071,
+  "spot_cvd": "Mixed: small-order CVD up, $1M-$10M flow flat/down (15:00 UTC)",
+  "futures_cvd": "Negative / sell-led (24h; shorts 51.5% of taker flow)",
+  "oi_usd": 53374231484,
+  "oi_change_pct": 0.0,
+  "funding": 0.000078,
+  "basis": null,
+  "liquidations": {
+    "long_1h": 1960000,
+    "short_1h": 2600,
+    "long_4h": 1980000,
+    "short_4h": 1420000,
+    "long_12h": 10970000,
+    "short_12h": 6560000,
+    "long_24h": 85110000,
+    "short_24h": 14470000,
+    "total_24h": 99580000
+  },
+  "liquidity_map": {
+    "reference_price": 76780,
+    "downside": {
+      "level": 75000,
+      "long_liquidation_intensity_usd": 1140000000
+    },
+    "upside": {
+      "level": 79000,
+      "short_liquidation_intensity_usd": 1390000000
+    },
+    "note": "CoinGlass liquidation-map intensity estimate, not exact pending contract notional"
+  },
+  "etf": {
+    "daily": -236.46,
+    "d3": null,
+    "status": "Outflow",
+    "date": "2026-09-01",
+    "finality": "final"
+  },
+  "current_regime": "Смешанный рынок / пост-разгрузка лонгов",
+  "regime_text": "Цена стабилизируется около $77.2k после сильного вымывания лонгов. Фьючерсный поток остаётся продавцом, OI за 24ч почти не растёт, funding положительный, а крупный Spot CVD пока не подтверждает устойчивый спрос. Ближайшая развилка — кластеры ликвидности около $75k и $79k.",
+  "causal_sequence": [
+    {
+      "label": "ETF: -$236.46M final outflow за 1 сентября",
+      "direction": "↓",
+      "stage": "БЫЛО"
+    },
+    {
+      "label": "Spot CVD: мелкие покупки растут, крупные заявки flat/down",
+      "direction": "→",
+      "stage": "ПЕРЕХОД"
+    },
+    {
+      "label": "Futures CVD: отрицательный, shorts = 51.5% taker flow",
+      "direction": "↓",
+      "stage": "ПЕРЕХОД"
+    },
+    {
+      "label": "OI: $53.37B, около 0% за 24ч — агрессивного build нет",
+      "direction": "→",
+      "stage": "СЕЙЧАС"
+    },
+    {
+      "label": "Ликвидации 24ч: LONG $85.11M против SHORT $14.47M",
+      "direction": "↓",
+      "stage": "СЕЙЧАС"
+    },
+    {
+      "label": "Цена: $77.24k, 24ч -0.07% — удержание после flush",
+      "direction": "→",
+      "stage": "СЕЙЧАС"
+    },
+    {
+      "label": "Funding: +0.0078% OI-weighted — positive, но не экстремальный",
+      "direction": "↑",
+      "stage": "СЕЙЧАС"
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "1. Здоровый рост",
+      "status": "НЕ АКТИВЕН",
+      "conditions": "Large-order Spot CVD должен развернуться вверх, BTC закрепиться выше $79k, OI расти умеренно",
+      "tactic": "LONG только после подтверждения реальным spot-спросом",
+      "confirmation": "Крупный Spot CVD ↑ и удержание BTC выше $79k"
+    },
+    {
+      "name": "2. Вынос шортов",
+      "status": "ПЕРЕХОД",
+      "conditions": "Пробой $79k + рост Short Liq при OI flat/↓",
+      "tactic": "Не шортить первый импульс, ждать истощения squeeze",
+      "confirmation": "Short Liq резко ↑, Futures CVD разворачивается вверх"
+    },
+    {
+      "name": "3. Набор новых лонгов",
+      "status": "НЕ АКТИВЕН",
+      "conditions": "Цена ↑ + OI ↑ + funding ↑ при слабом spot",
+      "tactic": "Не догонять рост; следить за перегревом leverage",
+      "confirmation": "OI и funding ускоряются без подтверждения Spot CVD"
+    },
+    {
+      "name": "4. Разгрузка лонгов",
+      "status": "ПЕРЕХОД",
+      "conditions": "24ч long-liquidations доминируют, но цена уже стабилизируется и OI flat",
+      "tactic": "Ждать окончания очистки; не продавать только из-за уже прошедшего flush",
+      "confirmation": "Ниже $75k: Long Liq ↑ и OI ↓"
+    },
+    {
+      "name": "5. Набор новых шортов",
+      "status": "НЕ АКТИВЕН",
+      "conditions": "Futures flow медвежий, но OI пока не растёт",
+      "tactic": "SHORT только если снижение сопровождается новым ростом OI",
+      "confirmation": "BTC < $75k + OI ↑ + Futures CVD ↓"
+    },
+    {
+      "name": "6. Поглощение продавца",
+      "status": "ПЕРЕХОД",
+      "conditions": "BTC держится около $77k несмотря на отрицательный ETF/futures фон и long flush",
+      "tactic": "Ждать подтверждения крупным Spot CVD",
+      "confirmation": "Large-order Spot CVD ↑ и цена перестаёт обновлять локальные минимумы"
+    }
+  ],
+  "next_branch": {
+    "up": [
+      {
+        "condition": "BTC > $79k + Short Liq ↑ + OI flat/↓",
+        "interpretation": "Вынос шортов"
+      },
+      {
+        "condition": "Large-order Spot CVD ↑ + BTC удерживает > $79k",
+        "interpretation": "Здоровый спотовый спрос"
+      },
+      {
+        "condition": "Цена ↑ + OI ↑ + funding ↑ при слабом Spot",
+        "interpretation": "Набор лонгов — осторожно"
+      }
+    ],
+    "down": [
+      {
+        "condition": "BTC < $75k + Long Liq ↑ + OI ↓",
+        "interpretation": "Продолжение разгрузки лонгов"
+      },
+      {
+        "condition": "BTC < $75k + OI ↑ + Futures CVD ↓",
+        "interpretation": "Набор новых шортов"
+      },
+      {
+        "condition": "Large-order Spot CVD ↑, а BTC не делает новый low",
+        "interpretation": "Поглощение продавца / разворот"
+      }
+    ]
+  },
+  "sources": [
+    "Binance official Spot API",
+    "CoinGlass",
+    "CoinBoss",
+    "CoinDesk",
+    "CoinNess",
+    "Farside Investors",
+    "ChainCatcher/Coinglass liquidation map",
+    "CoinGecko"
+  ],
+  "metric_status": {
+    "price_current": "verified: Binance official 24h ticker, closeTime 2026-09-02T19:47:19Z",
+    "price_1h_pct": "secondary source: CoinGecko rolling 1h; not used as a hard scenario confirmation",
+    "price_24h_pct": "verified: Binance official rolling 24h",
+    "spot_cvd": "latest accessible CVD snapshot is 2026-09-02T15:00:00Z; qualitative, not hard confirmation",
+    "futures_cvd": "verified qualitative 24h reading from CoinGlass data cited by CoinDesk",
+    "oi_usd": "CoinGlass aggregated OI",
+    "oi_change_pct": "approximately unchanged over 24h within CoinGlass coverage",
+    "funding": "CoinBoss OI-weighted composite across tracked exchanges",
+    "basis": "no reliable aggregated BTC basis value confirmed in this run",
+    "liquidations": "CoinBoss BTC window breakdown; 24h total/long dominance cross-checked against CoinGlass/CoinNess",
+    "etf": "final Sep 1 figure uses later-completed dataset including IBIT; early Farside snapshot was partial",
+    "liquidity_map": "same-day CoinGlass liquidation-map intensity estimate"
+  }
+}
