@@ -1,38 +1,142 @@
 {
-  "updated_at": "2026-09-03T10:56:00Z",
-  "price_current": 77597.27,
-  "price_1h_pct": -0.05,
-  "price_24h_pct": 0.18,
-  "spot_cvd": null,
+  "updated_at": "2026-09-03T12:55:00Z",
+  "price_current": 77834.89,
+  "price_1h_pct": null,
+  "price_24h_pct": 1.90,
+  "spot_cvd": "Intraday ↑: broad buy-side improvement by 10:00 UTC; Glassnode weekly -$67.2M on 01.09",
   "futures_cvd": null,
-  "oi_usd": 25100000000,
-  "oi_change_pct": 0.11,
-  "funding": 0.0076,
+  "oi_usd": 25200000000,
+  "oi_change_pct": 0.24,
+  "funding": 0.000077,
   "basis": "Binance BTCUSDT_260925 +0.34%",
-  "liquidations": {"long_1h":null,"short_1h":null,"long_4h":null,"short_4h":null,"long_12h":null,"short_12h":null,"long_24h":null,"short_24h":null,"total_24h":28200000},
+  "liquidations": {
+    "long_1h": null,
+    "short_1h": null,
+    "long_4h": null,
+    "short_4h": null,
+    "long_12h": null,
+    "short_12h": null,
+    "long_24h": null,
+    "short_24h": null,
+    "total_24h": null
+  },
   "liquidity_map": null,
-  "etf": {"daily":101.1,"d3":81.3,"status":"Inflow","date":"2026-09-02","finality":"final"},
-  "current_regime": "Отказ от $78k / баланс",
-  "regime_text": "BTC около $77.60k после очередной неудачной попытки принять $78k. OI около $25.1B и +0.11% за 24ч, funding +0.0076%, basis Sep25 +0.34%. ETF 02.09 final +$101.1M поддерживает спрос, но Spot/Futures CVD не подтверждены. Без CVD и разбивки ликвидаций снижение нельзя жёстко классифицировать как разгрузку лонгов или набор новых шортов.",
+  "etf": {
+    "daily": null,
+    "d3": 81.3,
+    "status": "Awaiting reports",
+    "date": "2026-09-03",
+    "finality": "partial"
+  },
+  "current_regime": "Повторный тест $78k / спот сильнее плеча",
+  "regime_text": "BTC снова у ~$77.8k после удержания $77.3k. OI ~$25.2B и +0.24% за 24ч, funding +0.0077%, Binance Sep25 basis +0.34%: плечо растёт умеренно, без явного ускорения. Intraday Spot CVD к 10:00 UTC улучшился по большинству размерных групп, однако последний доступный Glassnode weekly Spot CVD на 01.09 остаётся отрицательным (-$67.2M). Futures CVD н/д. ETF за 03.09 пока partial без опубликованных потоков; 02.09 final +$101.1M. Поэтому возврат к $78k выглядит менее derivative-led, но устойчивое принятие выше уровня ещё не подтверждено.",
   "causal_sequence": [
-    {"label":"ETF 02.09 final +$101.1M","direction":"up","stage":"БЫЛО"},
-    {"label":"BTC несколько раз тестировал $77.8-78k без устойчивого принятия","direction":"flat","stage":"БЫЛО"},
-    {"label":"BTC вернулся к ~$77.60k","direction":"down","stage":"ПЕРЕХОД"},
-    {"label":"OI ~$25.1B, +0.11% 24ч; funding +0.0076%","direction":"flat","stage":"СЕЙЧАС"},
-    {"label":"Spot/Futures CVD н/д; разбивка ликвидаций по окнам н/д","direction":"flat","stage":"СЕЙЧАС"}
+    {
+      "label": "ETF 02.09 final +$101.1M; 03.09 пока partial без опубликованных потоков",
+      "direction": "up",
+      "stage": "БЫЛО"
+    },
+    {
+      "label": "BTC удержал $77.3k и вернулся к области $77.8–78.0k",
+      "direction": "up",
+      "stage": "ПЕРЕХОД"
+    },
+    {
+      "label": "Intraday Spot CVD к 10:00 UTC усилился со стороны покупателя; weekly Glassnode 01.09 ещё -$67.2M",
+      "direction": "up",
+      "stage": "СЕЙЧАС"
+    },
+    {
+      "label": "OI ~$25.2B, +0.24% 24ч; funding +0.0077%; Binance Sep25 basis +0.34%",
+      "direction": "flat",
+      "stage": "СЕЙЧАС"
+    }
   ],
   "scenarios": [
-    {"name":"Здоровый рост","status":"ОСЛАБ","conditions":"Возврат и принятие выше $78k при Spot CVD вверх и умеренном OI","tactic":"LONG только по технической модели после подтверждения","confirmation":"Удержание выше $78k + Spot CVD вверх"},
-    {"name":"Вынос шортов","status":"НЕ ПОДТВЕРЖДЁН","conditions":"Цена вверх + OI вниз + Short Liq вверх","tactic":"Ждать подтверждения","confirmation":"Надёжная часовая разбивка Short Liq при снижении OI"},
-    {"name":"Набор новых лонгов","status":"ПОД ВОПРОСОМ","conditions":"Цена не проходит $78k при OI вверх и положительном funding","tactic":"Не догонять LONG","confirmation":"OI ускоряется вверх без прогресса цены"},
-    {"name":"Разгрузка лонгов","status":"НЕ ПОДТВЕРЖДЁН","conditions":"Цена вниз + OI вниз + Long Liq вверх","tactic":"Ждать подтверждения","confirmation":"Потеря $77.3k + OI вниз + Long Liq вверх"},
-    {"name":"Набор новых шортов","status":"НЕ ПОДТВЕРЖДЁН","conditions":"Цена вниз + OI вверх + Futures CVD вниз","tactic":"SHORT только по технической модели","confirmation":"Цена вниз при устойчивом OI вверх и Futures CVD вниз"},
-    {"name":"Поглощение покупателя","status":"ПОД ВОПРОСОМ","conditions":"ETF положительный, но цена не принимает $78k","tactic":"Не считать рост подтверждённым","confirmation":"Положительный Spot/ETF спрос без прогресса цены"}
+    {
+      "name": "Принятие выше $78k",
+      "status": "ЧАСТИЧНО ПОДТВЕРЖДЁН",
+      "conditions": "BTC удерживается выше $78k, intraday Spot CVD остаётся направлен вверх, OI не ускоряется резко",
+      "tactic": "LONG только после подтверждения технической моделью; не догонять импульс",
+      "confirmation": "Устойчивое принятие >$78k + Spot CVD ↑ при умеренном OI"
+    },
+    {
+      "name": "Ложный пробой / поглощение покупателя",
+      "status": "РИСК",
+      "conditions": "Spot CVD продолжает улучшаться, но BTC снова не удерживает $78k",
+      "tactic": "Не считать сам прокол $78k подтверждением роста",
+      "confirmation": "Положительный Spot-поток без прогресса цены и возврат < $77.6k"
+    },
+    {
+      "name": "Вынос шортов",
+      "status": "НЕ ПОДТВЕРЖДЁН",
+      "conditions": "Цена ↑ + OI ↓ + Short Liq ↑",
+      "tactic": "Не маркировать squeeze без согласованной разбивки ликвидаций",
+      "confirmation": "OI сокращается и подтверждённые Short Liq растут"
+    },
+    {
+      "name": "Набор новых шортов",
+      "status": "НЕ ПОДТВЕРЖДЁН",
+      "conditions": "Цена ↓ + OI ↑ + Futures CVD ↓",
+      "tactic": "SHORT только после подтверждения Futures CVD и структуры",
+      "confirmation": "Падение цены при устойчивом росте OI и Futures CVD ↓"
+    }
   ],
   "next_branch": {
-    "up":[{"condition":"BTC выше $78k + Spot CVD вверх + OI умеренный","interpretation":"Здоровый рост"},{"condition":"Цена вверх + OI вниз + Short Liq вверх","interpretation":"Вынос шортов"}],
-    "down":[{"condition":"Потеря $77.3k + OI вниз + Long Liq вверх","interpretation":"Разгрузка лонгов"},{"condition":"Цена вниз + OI вверх + Futures CVD вниз","interpretation":"Набор новых шортов"}]
+    "up": [
+      {
+        "condition": "Удержание >$78k + intraday Spot CVD остаётся ↑ + OI без резкого ускорения",
+        "interpretation": "Более здоровый спотовый импульс"
+      },
+      {
+        "condition": "Цена ↑ + OI ↓ + подтверждённые Short Liq ↑",
+        "interpretation": "Short squeeze"
+      }
+    ],
+    "down": [
+      {
+        "condition": "Spot CVD остаётся ↑, но цена снова отвергает $78k и возвращается < $77.6k",
+        "interpretation": "Поглощение покупателя / ложный пробой"
+      },
+      {
+        "condition": "Цена ↓ + OI ↑ + Futures CVD ↓",
+        "interpretation": "Набор новых шортов"
+      },
+      {
+        "condition": "Потеря $77.3k + OI ↓ + подтверждённые Long Liq ↑",
+        "interpretation": "Разгрузка лонгов"
+      }
+    ]
   },
-  "sources": ["CoinMarketCap","CoinCodex","Coinalyze","Farside Investors","CoinGlass"],
-  "metric_status": {"price_current":"verified","price_1h_pct":"verified","price_24h_pct":"verified_crosscheck","spot_cvd":"unavailable","futures_cvd":"unavailable","oi_usd":"verified","oi_change_pct":"verified_same_source_coverage","funding":"verified_same_source_coverage","basis":"verified_single_contract","liquidations":"partial_only_total_24h","liquidity_map":"unavailable","etf":"verified_final"}
+  "sources": [
+    "Coinalyze — BTC all-contract market snapshot (price/OI/OI change/funding)",
+    "Coinalyze — Binance BTCUSDT_260925 basis",
+    "Farside Investors — US spot BTC ETF flows",
+    "CoinNess — BTC/USDT Spot CVD chart, 03.09 10:00 UTC",
+    "Glassnode via FXStreet — latest accessible weekly Spot CVD, 01.09",
+    "Coinalyze / Blave / Powview / CoinStats — liquidation cross-check; material coverage conflict"
+  ],
+  "metric_status": {
+    "price_current": "verified: Coinalyze current snapshot",
+    "price_1h_pct": "unavailable_current",
+    "price_24h_pct": "verified_same_source_coverage",
+    "spot_cvd": "verified_qualitative_intraday; Glassnode_current_numeric_unavailable",
+    "futures_cvd": "unavailable_current",
+    "oi_usd": "verified_same_source_coverage",
+    "oi_change_pct": "verified_same_source_coverage",
+    "funding": "verified_same_source_coverage; stored as decimal fraction, displayed +0.0077%",
+    "basis": "verified_single_contract",
+    "liquidations": "data_conflict",
+    "liquidity_map": "unavailable_reliable_realtime_map",
+    "etf": "partial_no_reported_flows"
+  },
+  "metric_notes": {
+    "price_oi_funding": "Coinalyze current BTC row: price ~$77,834.89, 24h +1.90%, OI ~$25.2B, OI change +0.24% 24h, FR AVG +0.0077%.",
+    "basis": "Coinalyze Binance BTCUSDT_260925 Stable-M basis +0.34% in current accessible snapshot.",
+    "spot_cvd": "CoinNess 03.09 10:00 UTC chart shows broad intraday buy-side improvement; the $10k–$100k tranche is weaker. Glassnode latest accessible weekly reading dated 01.09 was -$67.2M, so the timeframes are not treated as equivalent.",
+    "futures_cvd": "No reliable current numeric Futures CVD confirmed. Older Glassnode values were excluded as stale.",
+    "etf": "Farside: 31.08 +$216.7M, 01.09 -$236.5M, 02.09 +$101.1M final; 03.09 has no constituent reports yet and is therefore partial. Last three final sessions sum to +$81.3M.",
+    "liquidations": "Current public sources disagree materially by venue/coverage: Coinalyze BTC total differs from Blave, Powview and CoinStats. Per quality rule all liquidation windows and total_24h are null and excluded from confirmation.",
+    "liquidity_map": "No reliable current realtime liquidation-map levels were confirmed; structural Glassnode support/supply zones were not relabeled as a liquidation map."
+  }
 }
